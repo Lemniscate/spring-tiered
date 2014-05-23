@@ -1,5 +1,6 @@
 package com.github.lemniscate.lib.rest.mapping;
 
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Identifiable;
@@ -14,22 +15,13 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public abstract class AbstractApiResourceAssembler<E extends Identifiable<ID>, ID extends Serializable, B> extends ResourceAssemblerSupport<E, Resource<E>> {
+public class ApiResourceAssembler<E extends Identifiable<ID>, ID extends Serializable, B> extends ResourceAssemblerSupport<E, Resource<E>> {
 
     @Inject
-    protected EntityLinks el;
+    protected EntityLinks entityLinks;
 
-    private static Class<?> resourceClass(){
-        return  (Class<?>) Resource.class;
-    }
-//
-//    @Inject
-//    public AbstractApiResourceAssembler(Class<? extends ApiResourceController<E, ID, B>> controllerClass) {
-//        super( controllerClass, (Class<Resource<E>>) resourceClass());
-//    }
-
-    public AbstractApiResourceAssembler() {
-        super( determineParam(3, 0), (Class<Resource<E>>) resourceClass());
+    public ApiResourceAssembler() {
+        super( determineParam(3, 0), (Class<Resource<E>>) (Class<?>) Resource.class);
     }
 
     @Override
@@ -41,11 +33,26 @@ public abstract class AbstractApiResourceAssembler<E extends Identifiable<ID>, I
     }
 
     /**
-     * Adds a reference to self, then calls {@link AbstractApiResourceAssembler#addLinks(java.util.Collection, org.springframework.hateoas.Identifiable)}
+     * Adds a reference to self, then calls {@link ApiResourceAssembler#addLinks(java.util.Collection, org.springframework.hateoas.Identifiable)}
      * so implementations can customize links.
      */
     protected void doAddLinks(Collection<Link> links, E entity) {
-        links.add( el.linkToSingleResource(entity).withSelfRel() );
+        ApiResourceDetails details = ApiResourceDetails.wrap(entity.getClass());
+        Link link;
+        if( details.isNested() && !details.isNestedCollection()){
+            link = entityLinks.linkToSingleResource(entity).withSelfRel();
+
+            String[] href = link.getHref().split("/");
+            StringBuilder sb = new StringBuilder();
+            for( int i = 0; i < href.length - 1; i++ ){
+                sb.append(href[i])
+                    .append(i < href.length - 2 ? "/" : "");
+            }
+            link = new Link(sb.toString(), "self");
+        }else{
+            link = entityLinks.linkToSingleResource(entity).withSelfRel();
+        }
+        links.add(link);
         addLinks(links, entity);
     }
 
@@ -64,7 +71,7 @@ public abstract class AbstractApiResourceAssembler<E extends Identifiable<ID>, I
             // the fourth entry should be our concrete class (unless we have some base-classes... crap)
             String name = st[callStackIndex].getClassName();
             Class<?> clazz = Class.forName(name);
-            Type result = GenericTypeResolver.resolveTypeArguments(clazz, AbstractApiResourceAssembler.class)[paramIndex];
+            Type result = GenericTypeResolver.resolveTypeArguments(clazz, ApiResourceAssembler.class)[paramIndex];
             return result.getClass();
         } catch (Exception e) {
             throw new IllegalStateException(e);

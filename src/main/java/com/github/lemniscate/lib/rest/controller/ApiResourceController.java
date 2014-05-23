@@ -1,7 +1,7 @@
 package com.github.lemniscate.lib.rest.controller;
 
-import com.github.lemniscate.lib.rest.annotation.ApiResourceWrapper;
-import com.github.lemniscate.lib.rest.mapping.AbstractApiResourceAssembler;
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
+import com.github.lemniscate.lib.rest.mapping.ApiResourceAssembler;
 import com.github.lemniscate.lib.rest.repo.ApiResourceRepository;
 import com.github.lemniscate.lib.rest.svc.AbstractApiResourceService;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class ApiResourceController<E extends Identifiable<ID>, ID extends Serial
         implements InitializingBean {
 
     @Inject
-    private AbstractApiResourceAssembler<E, ID, B> assembler;
+    private ApiResourceAssembler<E, ID, B> assembler;
 
     @Inject
     private ApiResourceRepository<E, ID> repository;
@@ -51,7 +51,7 @@ public class ApiResourceController<E extends Identifiable<ID>, ID extends Serial
     @PersistenceContext
     private EntityManager em;
 
-    public ApiResourceController(ApiResourceWrapper<E, ID, B> resource) {
+    public ApiResourceController(ApiResourceDetails<E, ID, B> resource) {
         super(resource);
     }
 

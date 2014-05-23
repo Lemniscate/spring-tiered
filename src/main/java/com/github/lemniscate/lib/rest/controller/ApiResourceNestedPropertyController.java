@@ -1,6 +1,6 @@
 package com.github.lemniscate.lib.rest.controller;
 
-import com.github.lemniscate.lib.rest.annotation.ApiResourceWrapper;
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
@@ -27,7 +27,7 @@ import java.lang.reflect.Field;
 public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<ID>>
         extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE> {
 
-    public ApiResourceNestedPropertyController(ApiResourceWrapper<E, ID, B> resource) {
+    public ApiResourceNestedPropertyController(ApiResourceDetails<E, ID, B> resource) {
         super(resource);
     }
 

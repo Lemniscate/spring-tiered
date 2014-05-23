@@ -1,5 +1,6 @@
 package com.github.lemniscate.lib.rest.mapping;
 
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Identifiable;
@@ -24,20 +25,8 @@ public class ApiNestedResourceAssembler<T extends Identifiable<ID>, ID extends S
     @Inject
     protected EntityLinks el;
 
-    private static Class<?> resourceClass(){
-        return  (Class<?>) Resource.class;
-    }
-//
-//    public ApiNestedResourceAssembler(Class<? extends ApiResourceBaseController.ApiResourceBaseNestedController<T, ID, B, P>> controllerClass) {
-//        super( controllerClass, (Class<Resource<T>>) resourceClass());
-//        Class<?>[] types = GenericTypeResolver.resolveTypeArguments(controllerClass, ApiResourceBaseController.ApiResourceBaseNestedController.class);
-//        this.domainClass = (Class<T>) types[0];
-//        this.parentClass = (Class<P>) types[3];
-//    }
-
     public ApiNestedResourceAssembler() {
-        super( determineParam(3, 0), (Class<Resource<T>>) resourceClass());
-//        Class<?>[] types = GenericTypeResolver.resolveTypeArguments(determineParam(3, 0), ApiResourceBaseController.ApiResourceBaseNestedController.class);
+        super( determineParam(3, 0), (Class<Resource<T>>)(Class<?>) Resource.class);
         this.domainClass = (Class<T>) determineParam(3, 0);
         this.parentClass = (Class<P>) determineParam(3, 3);
     }
@@ -64,8 +53,13 @@ public class ApiNestedResourceAssembler<T extends Identifiable<ID>, ID extends S
 		return new Resource<T>(entity, links);
 	}
 
-	protected void doAddLinks(Collection<Link> links, T entity, P parent){
-		links.add(el.linkToSingleResource(entity).withSelfRel());
+	protected void doAddLinks(Collection<Link> links, T entity, final P parent){
+        ApiResourceDetails details = ApiResourceDetails.from(entity.getClass());
+        String parentHref = el.linkForSingleResource(parent).toString();
+        String[] pathSplit = details.getPath().split("/");
+        String base = parentHref + "/" + pathSplit[pathSplit.length - 1];
+        Link result = new Link( base + "/" + entity.getId(), "self");
+		links.add(result);
 		addLinks(links, entity, parent );
 	}
 	

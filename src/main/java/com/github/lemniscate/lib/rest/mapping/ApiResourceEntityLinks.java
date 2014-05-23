@@ -2,6 +2,7 @@ package com.github.lemniscate.lib.rest.mapping;
 
 import com.github.lemniscate.lib.rest.annotation.ApiNestedResource;
 import com.github.lemniscate.lib.rest.annotation.ApiResource;
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import com.github.lemniscate.lib.rest.controller.ApiResourceController;
 import com.github.lemniscate.lib.rest.util.ApiResourceUtil;
 import com.github.lemniscate.lib.rest.util.EntityAwareBeanUtil;
@@ -49,24 +50,30 @@ public class ApiResourceEntityLinks extends AbstractEntityLinks{
     @Override
     public Link linkToSingleResource(Class<?> entityClass, Object id) {
         Assert.notNull(entityClass);
-        ApiNestedResource anr = entityClass.getAnnotation(ApiNestedResource.class);
-        if( anr != null ){
+        ApiResourceDetails details = ApiResourceDetails.from(entityClass);
+        Link result;
+        if( details.isNestedCollection() ){
             Identifiable<?> entity = (Identifiable<?>) entityAwareBeanUtil.loadUnrelatedEntity((Serializable) id, entityClass);
-            return linkToSingleResource(entity);
+            result = linkToSingleResource(entity);
+        }else if( details.isNested() ){
+            Identifiable<?> entity = (Identifiable<?>) entityAwareBeanUtil.loadUnrelatedEntity((Serializable) id, entityClass);
+            Identifiable<?> parent = ApiResourceUtil.getParentEntity(entity);
+            result = linkFor(entityClass, new Object[]{ parent.getId() }).withSelfRel();
         }else{
-            return linkFor(entityClass).slash(id).withSelfRel();
+            result = linkFor(entityClass).slash(id).withSelfRel();
         }
+        return result;
     }
 
     @Override
     public Link linkToSingleResource(Identifiable<?> entity) {
         Assert.notNull(entity);
-        ApiNestedResource anr = entity.getClass().getAnnotation(ApiNestedResource.class);
-        if( anr != null ){
+        ApiResourceDetails details = ApiResourceDetails.from(entity.getClass());
+        if( details.isNestedCollection() ){
             Identifiable<?> parent = ApiResourceUtil.getParentEntity(entity);
 
             return linkFor( parent.getClass() ).slash( parent.getId() )
-                    .slash( anr.path() ).slash( entity.getId())
+                    .slash( details.getPath() ).slash( entity.getId())
                     .withSelfRel();
         }else{
             return linkFor( entity.getClass() ).slash( entity.getId()).withSelfRel();

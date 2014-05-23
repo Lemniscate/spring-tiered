@@ -1,6 +1,6 @@
 package com.github.lemniscate.lib.rest.controller;
 
-import com.github.lemniscate.lib.rest.annotation.ApiResourceWrapper;
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +39,7 @@ import java.util.List;
 public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<ID>>
         extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE>  {
 
-    public ApiResourceNestedCollectionController(ApiResourceWrapper<E, ID, B> resource) {
+    public ApiResourceNestedCollectionController(ApiResourceDetails<E, ID, B> resource) {
         super(resource);
     }
 

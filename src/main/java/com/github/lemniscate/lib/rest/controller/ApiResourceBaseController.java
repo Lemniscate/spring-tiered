@@ -1,6 +1,6 @@
 package com.github.lemniscate.lib.rest.controller;
 
-import com.github.lemniscate.lib.rest.annotation.ApiResourceWrapper;
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import com.github.lemniscate.lib.rest.mapping.ApiNestedResourceAssembler;
 import com.github.lemniscate.lib.rest.repo.ApiResourceRepository;
 import com.github.lemniscate.lib.rest.svc.AbstractApiResourceService;
@@ -18,7 +18,7 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
         implements InitializingBean {
 
     @Getter
-    protected final ApiResourceWrapper<E, ID, B> resource;
+    protected final ApiResourceDetails<E, ID, B> resource;
 
     @Inject
     protected EntityAwareBeanUtil beanUtil;
@@ -27,7 +27,7 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
     protected final Class<ID> idClass;
     protected final Class<B> beanClass;
 
-    protected ApiResourceBaseController(ApiResourceWrapper<E, ID, B> resource) {
+    protected ApiResourceBaseController(ApiResourceDetails<E, ID, B> resource) {
         Assert.notNull(resource, "Resource information required");
         this.resource = resource;
         this.domainClass = resource.getDomainClass();
@@ -58,7 +58,7 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
 
         private final Class<?> parentClass;
 
-        protected ApiResourceBaseNestedController(ApiResourceWrapper<E, ID, B> resource) {
+        protected ApiResourceBaseNestedController(ApiResourceDetails<E, ID, B> resource) {
             super(resource);
             this.parentClass = resource.getParentClass();
         }

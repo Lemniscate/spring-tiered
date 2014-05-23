@@ -45,10 +45,10 @@ public @interface EnableApiResources {
                     .addConstructorArgValue(basePackage)
                     .getBeanDefinition();
             registry.registerBeanDefinition("apiResourcesPostProcessor", def);
-            registry.registerBeanDefinition("resourceHandlerMapping", new RootBeanDefinition(ApiResourceControllerHandlerMapping.class));
-            registry.registerBeanDefinition("apiResourceLinkBuilderFactory", new RootBeanDefinition(ApiResourceLinkBuilderFactory.class));
+            registry.registerBeanDefinition("apiResourcesHandlerMapping", new RootBeanDefinition(ApiResourceControllerHandlerMapping.class));
+            registry.registerBeanDefinition("apiResourcesLinkBuilderFactory", new RootBeanDefinition(ApiResourceLinkBuilderFactory.class));
             registry.registerBeanDefinition("entityAwareBeanUtil", new RootBeanDefinition(EntityAwareBeanUtil.class));
-            registry.registerBeanDefinition("apiResourceEntityLinks", new RootBeanDefinition(ApiResourceEntityLinks.class));
+            registry.registerBeanDefinition("apiResourcesEntityLinks", new RootBeanDefinition(ApiResourceEntityLinks.class));
         }
     }
 }

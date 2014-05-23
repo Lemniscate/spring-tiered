@@ -17,7 +17,7 @@ import java.lang.reflect.Field;
  * Convenience class to encapsulate the data between {@link ApiResource} and {@link ApiNestedResource}.
  */
 @Getter
-public final class ApiResourceWrapper<E extends Identifiable<ID>, ID extends Serializable, B> {
+public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Serializable, B> {
 
     private final Class<ID> idClass;
     private final Class<E> domainClass;
@@ -25,19 +25,19 @@ public final class ApiResourceWrapper<E extends Identifiable<ID>, ID extends Ser
     private final Class<?> beanClass;
     private final String name, path, parentProperty;
 
-    public static <E extends Identifiable<ID>, ID extends Serializable, B> ApiResourceWrapper<E, ID, B> wrap(Class<?> domainClass){
+    public static <E extends Identifiable<ID>, ID extends Serializable, B> ApiResourceDetails<E, ID, B> wrap(Class<?> domainClass){
         ApiResource ar = domainClass.getAnnotation(ApiResource.class);
         ApiNestedResource anr = domainClass.getAnnotation(ApiNestedResource.class);
         if( ar != null ){
-            return new ApiResourceWrapper(ar, domainClass);
+            return new ApiResourceDetails(ar, domainClass);
         }else if( anr != null){
-            return new ApiResourceWrapper(anr, domainClass);
+            return new ApiResourceDetails(anr, domainClass);
         }
 
         throw new IllegalArgumentException("Could not find annotations");
     }
 
-    public ApiResourceWrapper(ApiResource resource, Class<?> domainClass){
+    public ApiResourceDetails(ApiResource resource, Class<?> domainClass){
         this.name = getPath(domainClass);
         this.path = "/" + name;
 
@@ -48,7 +48,7 @@ public final class ApiResourceWrapper<E extends Identifiable<ID>, ID extends Ser
         this.parentProperty = null;
     }
 
-    public ApiResourceWrapper(ApiNestedResource resource, Class<?> domainClass){
+    public ApiResourceDetails(ApiNestedResource resource, Class<?> domainClass){
         this.name = getPath(domainClass);
 
         String parentProperty = resource.parentProperty();
@@ -63,16 +63,16 @@ public final class ApiResourceWrapper<E extends Identifiable<ID>, ID extends Ser
         this.parentProperty = resource.parentProperty();
     }
 
-    public static <E extends Identifiable<ID>, ID extends Serializable, B> ApiResourceWrapper<E, ID, B> from(Class<?> domainClass){
+    public static <E extends Identifiable<ID>, ID extends Serializable, B> ApiResourceDetails<E, ID, B> from(Class<?> domainClass){
 
         ApiResource ar = domainClass.getAnnotation(ApiResource.class);
         ApiNestedResource anr = domainClass.getAnnotation(ApiNestedResource.class);
 
-        ApiResourceWrapper wrapper = null;
+        ApiResourceDetails wrapper = null;
         if( ar != null ){
-            wrapper = new ApiResourceWrapper(ar, domainClass);
+            wrapper = new ApiResourceDetails(ar, domainClass);
         }else if( anr != null ){
-            wrapper = new ApiResourceWrapper(anr, domainClass);
+            wrapper = new ApiResourceDetails(anr, domainClass);
         }
         return wrapper;
     }

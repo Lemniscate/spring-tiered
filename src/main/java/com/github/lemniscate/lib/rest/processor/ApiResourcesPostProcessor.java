@@ -1,10 +1,10 @@
 package com.github.lemniscate.lib.rest.processor;
 
-import com.github.lemniscate.lib.rest.annotation.ApiResourceWrapper;
+import com.github.lemniscate.lib.rest.annotation.ApiResourceDetails;
 import com.github.lemniscate.lib.rest.controller.ApiResourceController;
 import com.github.lemniscate.lib.rest.controller.ApiResourceNestedCollectionController;
 import com.github.lemniscate.lib.rest.controller.ApiResourceNestedPropertyController;
-import com.github.lemniscate.lib.rest.mapping.AbstractApiResourceAssembler;
+import com.github.lemniscate.lib.rest.mapping.ApiResourceAssembler;
 import com.github.lemniscate.lib.rest.mapping.ApiNestedResourceAssembler;
 import com.github.lemniscate.lib.rest.mapping.ApiResourceMapping;
 import com.github.lemniscate.lib.rest.repo.ApiResourceRepository;
@@ -52,7 +52,7 @@ public class ApiResourcesPostProcessor implements
     @SneakyThrows
     public void doIt(BeanDefinitionRegistry registry){
         for( Class<?> entity : entities ){
-            ApiResourceWrapper wrapper = ApiResourceWrapper.from(entity);
+            ApiResourceDetails wrapper = ApiResourceDetails.from(entity);
             Deets details = map.get(entity);
 
 
@@ -112,7 +112,7 @@ public class ApiResourcesPostProcessor implements
                 if( wrapper.isNested()){
                     serviceClass = JavassistUtil.generateTypedSubclass(name, ApiNestedResourceAssembler.class, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getBeanClass(), wrapper.getParentClass());
                 }else{
-                    serviceClass = JavassistUtil.generateTypedSubclass(name, AbstractApiResourceAssembler.class, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getBeanClass());
+                    serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceAssembler.class, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getBeanClass());
                 }
 
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
@@ -144,29 +144,29 @@ public class ApiResourcesPostProcessor implements
             if( d instanceof AbstractBeanDefinition ){
                 AbstractBeanDefinition def = (AbstractBeanDefinition) d;
 
-                if( ApiResourceController.class.getName().equals( def.getClass().getName() )){
+                if( isBeanType(def, ApiResourceController.class)){
                     Class<?> entity = getEntityType(def, AbstractApiResourceService.class);
                     map.get(entity).service = def;
                 }
 
-                if( AbstractApiResourceAssembler.class.getName().equals( def.getClass().getName() )){
-                    Class<?> entity = getEntityType(def, AbstractApiResourceAssembler.class);
+                if( isBeanType( def, ApiResourceAssembler.class )){
+                    Class<?> entity = getEntityType(def, ApiResourceAssembler.class);
                     map.get(entity).assembler = def;
-                }else if( ApiResourceNestedCollectionController.class.getName().equals( def.getClass().getName() )){
+                }else if( isBeanType( def, ApiResourceNestedCollectionController.class )){
                     Class<?> entity = getEntityType(def, ApiResourceNestedCollectionController.class);
                     map.get(entity).assembler = def;
-                }else if( ApiResourceNestedPropertyController.class.getName().equals( def.getClass().getName() )){
+                }else if( isBeanType( def, ApiResourceNestedPropertyController.class )){
                     Class<?> entity = getEntityType(def, ApiResourceNestedPropertyController.class);
                     map.get(entity).assembler = def;
                 }
 
-                if( AbstractApiResourceService.class.getName().equals( def.getClass().getName() )){
+                if( isBeanType(def, AbstractApiResourceService.class)){
                     Class<?> entity = getEntityType(def, AbstractApiResourceService.class);
                     map.get(entity).service = def;
                 }
 
 
-                if( JpaRepositoryFactoryBean.class.getName().equals( def.getBeanClassName()) ){
+                if( isBeanType(def, JpaRepositoryFactoryBean.class)){
                     String repoName = (String) def.getPropertyValues().get("repositoryInterface");
                     Class<?> entity = GenericTypeResolver.resolveTypeArguments( Class.forName(repoName), ApiResourceRepository.class)[0];
                     map.get(entity).repository = def;
@@ -174,6 +174,15 @@ public class ApiResourcesPostProcessor implements
             }
 
         }
+    }
+
+    @SneakyThrows
+    private boolean isBeanType( AbstractBeanDefinition beanDef, Class<?> targetType){
+        if( beanDef.getBeanClassName() != null ){
+            Class<?> beanClass = Class.forName( beanDef.getBeanClassName() );
+            return targetType.isAssignableFrom( beanClass );
+        }
+        return false;
     }
 
     @SneakyThrows
