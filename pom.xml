@@ -11,8 +11,10 @@
     </parent>
 
     <groupId>com.github.lemniscate.lib</groupId>
-    <artifactId>spring-rest-api</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <artifactId>spring-tiered</artifactId>
+    <version>0.1.3-SNAPSHOT</version>
+
+    <name>Spring Tiered</name>
 
     <dependencies>
         <dependency>

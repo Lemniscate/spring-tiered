@@ -1,6 +1,6 @@
 package demo.repo;
 
-import com.github.lemniscate.lib.rest.repo.ApiResourceRepository;
+import com.github.lemniscate.lib.tiered.repo.ApiResourceRepository;
 import demo.model.User;
 
 import java.util.List;

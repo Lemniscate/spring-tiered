@@ -1,6 +1,6 @@
 package demo.model;
 
-import com.github.lemniscate.lib.rest.annotation.ApiResource;
+import com.github.lemniscate.lib.tiered.annotation.ApiResource;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

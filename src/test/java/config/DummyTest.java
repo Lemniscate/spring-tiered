@@ -1,11 +1,11 @@
 package config;
 
-import com.github.lemniscate.lib.rest.annotation.EnableApiResources;
-import com.github.lemniscate.lib.rest.controller.ApiResourceController;
-import com.github.lemniscate.lib.rest.controller.ApiResourceNestedCollectionController;
-import com.github.lemniscate.lib.rest.controller.ApiResourceNestedPropertyController;
-import com.github.lemniscate.lib.rest.repo.ApiResourceRepository;
-import com.github.lemniscate.lib.rest.svc.AbstractApiResourceService;
+import com.github.lemniscate.lib.tiered.annotation.EnableApiResources;
+import com.github.lemniscate.lib.tiered.controller.ApiResourceController;
+import com.github.lemniscate.lib.tiered.controller.ApiResourceNestedCollectionController;
+import com.github.lemniscate.lib.tiered.controller.ApiResourceNestedPropertyController;
+import com.github.lemniscate.lib.tiered.repo.ApiResourceRepository;
+import com.github.lemniscate.lib.tiered.svc.ApiResourceService;
 import demo.model.Organization;
 import demo.model.Pet;
 import demo.model.User;
@@ -44,12 +44,12 @@ public class DummyTest {
     @Inject
     private ApiResourceRepository<User, Long> userRepo;
     @Inject
-    private AbstractApiResourceService<User, Long> userService;
+    private ApiResourceService<User, Long> userService;
 
     @Inject
     private ApiResourceRepository<Pet, Long> petRepo;
     @Inject
-    private AbstractApiResourceService<Pet, Long> petService;
+    private ApiResourceService<Pet, Long> petService;
 
     @Inject
     private ApiResourceController<Organization, Long, Organization> organizationController;
@@ -72,7 +72,7 @@ public class DummyTest {
     }
 
     @Configuration
-    @EnableApiResources(User.class)
+    @EnableApiResources(value = User.class)
     @Import(DefaultConfig.class)
     @EnableJpaRepositories(basePackages = {"demo.repo"})
     public static class Config{
