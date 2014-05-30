@@ -2,6 +2,8 @@ package com.github.lemniscate.lib.tiered.annotation;
 
 import lombok.Getter;
 import org.hibernate.annotations.ManyToAny;
+import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -12,6 +14,7 @@ import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Collection;
 
 /**
  * Convenience class to encapsulate the data between {@link ApiResource} and {@link ApiNestedResource}.
@@ -76,6 +79,14 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
         }
         return wrapper;
     }
+
+    public static <E extends Identifiable<ID>, ID extends Serializable, B> ApiResourceDetails<E, ID, B> from(Field field){
+        Class<?> domainClass = field.getType();
+        if( Collection.class.isAssignableFrom(domainClass) ){
+            domainClass = GenericCollectionTypeResolver.getCollectionFieldType(field);
+        }
+        return from(domainClass);
+    };
 
     public boolean isNested(){
         return parentClass != null;

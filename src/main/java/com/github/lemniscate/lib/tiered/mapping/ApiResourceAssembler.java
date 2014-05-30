@@ -1,6 +1,7 @@
 package com.github.lemniscate.lib.tiered.mapping;
 
 import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
+import com.github.lemniscate.lib.tiered.util.BeanLookupUtil;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Identifiable;
@@ -8,6 +9,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -19,6 +21,12 @@ public class ApiResourceAssembler<E extends Identifiable<ID>, ID extends Seriali
 
     @Inject
     protected EntityLinks entityLinks;
+
+    @Inject
+    protected ApiResourceLinkBuilderFactory arLinkBuilder;
+
+    @Inject
+    private BeanLookupUtil beanLookup;
 
     public ApiResourceAssembler() {
         super( determineParam(3, 0), (Class<Resource<E>>) (Class<?>) Resource.class);
@@ -36,7 +44,7 @@ public class ApiResourceAssembler<E extends Identifiable<ID>, ID extends Seriali
      * Adds a reference to self, then calls {@link ApiResourceAssembler#addLinks(java.util.Collection, org.springframework.hateoas.Identifiable)}
      * so implementations can customize links.
      */
-    protected void doAddLinks(Collection<Link> links, E entity) {
+    private void doAddLinks(Collection<Link> links, E entity) {
         ApiResourceDetails details = ApiResourceDetails.wrap(entity.getClass());
         Link link;
         if( details.isNested() && !details.isNestedCollection()){
@@ -57,7 +65,10 @@ public class ApiResourceAssembler<E extends Identifiable<ID>, ID extends Seriali
     }
 
 
-    public void addLinks(Collection<Link> links, E entity) {}
+    public void addLinks(Collection<Link> links, E entity) {
+        AssemblerFieldHelper helper = new AssemblerFieldHelper(entityLinks, arLinkBuilder, beanLookup, links, entity);
+        ReflectionUtils.doWithFields(entity.getClass(), helper, helper);
+    }
 
     public E prepare(E t){
         return t;

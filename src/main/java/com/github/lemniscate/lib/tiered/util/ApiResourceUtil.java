@@ -2,6 +2,7 @@ package com.github.lemniscate.lib.tiered.util;
 
 import com.github.lemniscate.lib.tiered.annotation.ApiNestedResource;
 import com.github.lemniscate.lib.tiered.annotation.ApiResource;
+import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
 import org.reflections.Reflections;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -15,6 +16,7 @@ import java.util.Set;
  * @Author dave 5/8/14 5:18 PM
  */
 public class ApiResourceUtil {
+
     public static <T> T getParentEntity(Object child){
         ApiNestedResource anr = child.getClass().getAnnotation(ApiNestedResource.class);
         Assert.notNull( anr, "Not a nested resource");
@@ -32,4 +34,5 @@ public class ApiResourceUtil {
 
         return entities;
     }
+
 }

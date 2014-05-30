@@ -1,6 +1,7 @@
 package com.github.lemniscate.lib.tiered.mapping;
 
 import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
+import com.github.lemniscate.lib.tiered.util.BeanLookupUtil;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Identifiable;
@@ -8,6 +9,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -17,24 +19,25 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class ApiNestedResourceAssembler<T extends Identifiable<ID>, ID extends Serializable, B, P extends Identifiable<ID>> extends ResourceAssemblerSupport<T, Resource<T>> {
-
-    private final Class<T> domainClass;
-    private final Class<P> parentClass;
+public class ApiNestedResourceAssembler<E extends Identifiable<ID>, ID extends Serializable, B, P extends Identifiable<ID>> extends ResourceAssemblerSupport<E, Resource<E>> {
 
     @Inject
-    protected EntityLinks el;
+    protected EntityLinks entityLinks;
+
+    @Inject
+    protected ApiResourceLinkBuilderFactory arLinkBuilder;
+
+    @Inject
+    private BeanLookupUtil beanLookup;
 
     public ApiNestedResourceAssembler() {
-        super( determineParam(3, 0), (Class<Resource<T>>)(Class<?>) Resource.class);
-        this.domainClass = (Class<T>) determineParam(3, 0);
-        this.parentClass = (Class<P>) determineParam(3, 3);
+        super( determineParam(3, 0), (Class<Resource<E>>)(Class<?>) Resource.class);
     }
 	
-	public List<Resource<T>> toResources(Iterable<? extends T> entities, P parent){
+	public List<Resource<E>> toResources(Iterable<? extends E> entities, P parent){
 		Assert.notNull(entities);
-		List<Resource<T>> result = new ArrayList<Resource<T>>();
-		for (T entity : entities){
+		List<Resource<E>> result = new ArrayList<Resource<E>>();
+		for (E entity : entities){
 			result.add(toResource(entity, parent));
 		}
 		
@@ -43,19 +46,19 @@ public class ApiNestedResourceAssembler<T extends Identifiable<ID>, ID extends S
 	
 	//NOTE: Shouldn't be called on a nested resource
 	@Override
-	public Resource<T> toResource(T entity) {
+	public Resource<E> toResource(E entity) {
 		throw new UnsupportedOperationException();
 	}	
 	
-	public Resource<T> toResource(T entity, P parent){
+	public Resource<E> toResource(E entity, P parent){
 		Collection<Link> links = new ArrayList<Link>();
 		doAddLinks(links, entity, parent);
-		return new Resource<T>(entity, links);
+		return new Resource<E>(entity, links);
 	}
 
-	protected void doAddLinks(Collection<Link> links, T entity, final P parent){
+	private void doAddLinks(Collection<Link> links, E entity, final P parent){
         ApiResourceDetails details = ApiResourceDetails.from(entity.getClass());
-        String parentHref = el.linkForSingleResource(parent).toString();
+        String parentHref = entityLinks.linkForSingleResource(parent).toString();
         String[] pathSplit = details.getPath().split("/");
         String base = parentHref + "/" + pathSplit[pathSplit.length - 1];
         Link result = new Link( base + "/" + entity.getId(), "self");
@@ -63,9 +66,12 @@ public class ApiNestedResourceAssembler<T extends Identifiable<ID>, ID extends S
 		addLinks(links, entity, parent );
 	}
 	
-	public void addLinks(Collection<Link> links, T entity, P parent) {}
+	public void addLinks(final Collection<Link> links, final E entity, final P parent) {
+        AssemblerFieldHelper helper = new AssemblerFieldHelper(entityLinks, arLinkBuilder, beanLookup, links, entity);
+        ReflectionUtils.doWithFields(entity.getClass(), helper, helper);
+    }
 
-    public T prepare(T t){
+    public E prepare(E t){
         return t;
     }
 

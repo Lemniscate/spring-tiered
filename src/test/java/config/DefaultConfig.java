@@ -90,6 +90,7 @@ public class DefaultConfig {
     private Properties getJpaProperties() {
         Properties props = new Properties();
         props.put("hibernate.ejb.naming_strategy", ImprovedNamingStrategy.class.getName());
+        props.put("hibernate.enable_lazy_load_no_trans", "true");
         return props;
     }
 

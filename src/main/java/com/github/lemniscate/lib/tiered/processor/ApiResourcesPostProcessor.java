@@ -11,10 +11,13 @@ import com.github.lemniscate.lib.tiered.repo.ApiResourceRepository;
 import com.github.lemniscate.lib.tiered.svc.ApiResourceService;
 import com.github.lemniscate.lib.tiered.util.ApiResourceUtil;
 import com.github.lemniscate.util.bytecode.JavassistUtil;
+import javassist.CannotCompileException;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -46,11 +49,14 @@ public class ApiResourcesPostProcessor implements
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         populateMap(registry);
-        doIt(registry);
+        try {
+            generateBeans(registry);
+        } catch (Exception e){
+            throw new FatalBeanException("Failed generating ApiResources", e);
+        }
     }
 
-    @SneakyThrows
-    public void doIt(BeanDefinitionRegistry registry){
+    public void generateBeans(BeanDefinitionRegistry registry) throws NotFoundException, CannotCompileException {
         for( Class<?> entity : entities ){
             ApiResourceDetails wrapper = ApiResourceDetails.from(entity);
             Deets details = map.get(entity);
@@ -58,31 +64,31 @@ public class ApiResourcesPostProcessor implements
 
 
             if( details.service == null){
-                Class<?> serviceClass = JavassistUtil.generateTypedSubclass(wrapper.getName() + "Service", ApiResourceService.class, wrapper.getDomainClass(), wrapper.getIdClass());
+                Class<?> serviceClass = JavassistUtil.generateTypedSubclass(entity.getSimpleName() + "Service", ApiResourceService.class, wrapper.getDomainClass(), wrapper.getIdClass());
 
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                         .addPropertyValue("domainClass", entity)
                         .addPropertyValue("idClass", wrapper.getIdClass())
                         .getBeanDefinition();
-                registry.registerBeanDefinition( wrapper.getName() + "Service", def);
+                registry.registerBeanDefinition( entity.getSimpleName() + "Service", def);
 
             }else{
                 log.info("Found user defined service for {}", entity.getSimpleName());
             }
 
             if( details.repository == null ){
-                Class<?> repoClass = JavassistUtil.generateTypedInterface( wrapper.getName() + "Repository", ApiResourceRepository.class, wrapper.getDomainClass(), wrapper.getIdClass());
+                Class<?> repoClass = JavassistUtil.generateTypedInterface( entity.getSimpleName() + "Repository", ApiResourceRepository.class, wrapper.getDomainClass(), wrapper.getIdClass());
 
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(JpaRepositoryFactoryBean.class)
                         .addPropertyValue("repositoryInterface", repoClass)
                         .getBeanDefinition();
-                registry.registerBeanDefinition( wrapper.getName() + "Repository", def);
+                registry.registerBeanDefinition( entity.getSimpleName() + "Repository", def);
             }else{
                 log.info("Found user defined repository for {}", entity.getSimpleName());
             }
 
             if( details.controller == null ){
-                String name = wrapper.getName() + "Controller";
+                String name = entity.getSimpleName() + "Controller";
                 Class<?> serviceClass;
                 if( wrapper.isNested() ){
                     Class<?> baseClass = wrapper.isNestedCollection()
@@ -101,13 +107,13 @@ public class ApiResourcesPostProcessor implements
                 details.controller = def;
             }else{
                 log.info("Found user defined controller for {}", entity.getSimpleName());
-                String name = wrapper.getName() + "Controller";
+                String name = entity.getSimpleName() + "Controller";
                 registry.registerBeanDefinition(name, details.controller);
             }
 
             if( details.assembler == null){
 
-                String name = wrapper.getName() + "Assembler";
+                String name = entity.getSimpleName() + "Assembler";
                 Class<?> serviceClass;
                 if( wrapper.isNested()){
                     serviceClass = JavassistUtil.generateTypedSubclass(name, ApiNestedResourceAssembler.class, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getBeanClass(), wrapper.getParentClass());
@@ -125,9 +131,9 @@ public class ApiResourcesPostProcessor implements
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(ApiResourceMapping.class)
                         .addConstructorArgValue(wrapper.getPath())
-                        .addConstructorArgReference(wrapper.getName() + "Controller")
+                        .addConstructorArgReference(entity.getSimpleName() + "Controller")
                     .getBeanDefinition();
-            registry.registerBeanDefinition( wrapper.getName() + "Mapping", def);
+            registry.registerBeanDefinition( entity.getSimpleName() + "Mapping", def);
         }
     }
 
@@ -141,20 +147,23 @@ public class ApiResourcesPostProcessor implements
             if( d instanceof AbstractBeanDefinition ){
                 AbstractBeanDefinition def = (AbstractBeanDefinition) d;
 
-                if( isBeanType(def, ApiResourceController.class)){
-                    Class<?> entity = getEntityType(def, ApiResourceService.class);
-                    map.get(entity).service = def;
-                }
-
-                if( isBeanType( def, ApiResourceAssembler.class )){
+                if( isBeanType(def, ApiResourceAssembler.class)){
                     Class<?> entity = getEntityType(def, ApiResourceAssembler.class);
                     map.get(entity).assembler = def;
+                }else if( isBeanType(def, ApiNestedResourceAssembler.class)){
+                    Class<?> entity = getEntityType(def, ApiNestedResourceAssembler.class);
+                    map.get(entity).assembler = def;
+                }
+
+                if( isBeanType( def, ApiResourceController.class )){
+                    Class<?> entity = getEntityType(def, ApiResourceController.class);
+                    map.get(entity).controller = def;
                 }else if( isBeanType( def, ApiResourceNestedCollectionController.class )){
                     Class<?> entity = getEntityType(def, ApiResourceNestedCollectionController.class);
-                    map.get(entity).assembler = def;
+                    map.get(entity).controller = def;
                 }else if( isBeanType( def, ApiResourceNestedPropertyController.class )){
                     Class<?> entity = getEntityType(def, ApiResourceNestedPropertyController.class);
-                    map.get(entity).assembler = def;
+                    map.get(entity).controller = def;
                 }
 
                 if( isBeanType(def, ApiResourceService.class)){

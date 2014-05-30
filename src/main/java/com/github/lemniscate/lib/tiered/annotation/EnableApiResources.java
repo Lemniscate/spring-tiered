@@ -4,6 +4,7 @@ import com.github.lemniscate.lib.tiered.mapping.ApiResourceControllerHandlerMapp
 import com.github.lemniscate.lib.tiered.mapping.ApiResourceEntityLinks;
 import com.github.lemniscate.lib.tiered.mapping.ApiResourceLinkBuilderFactory;
 import com.github.lemniscate.lib.tiered.processor.ApiResourcesPostProcessor;
+import com.github.lemniscate.lib.tiered.util.BeanLookupUtil;
 import com.github.lemniscate.lib.tiered.util.EntityAwareBeanUtil;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -57,6 +58,7 @@ public @interface EnableApiResources {
             registry.registerBeanDefinition("apiResourcesLinkBuilderFactory", new RootBeanDefinition(ApiResourceLinkBuilderFactory.class));
             registry.registerBeanDefinition("entityAwareBeanUtil", new RootBeanDefinition(EntityAwareBeanUtil.class));
             registry.registerBeanDefinition("apiResourcesEntityLinks", new RootBeanDefinition(ApiResourceEntityLinks.class));
+            registry.registerBeanDefinition("beanLookupUtil", new RootBeanDefinition(BeanLookupUtil.class));
         }
     }
 }
