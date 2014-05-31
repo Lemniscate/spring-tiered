@@ -24,8 +24,8 @@ import java.lang.reflect.Field;
 /**
 * @Author dave 5/9/14 9:20 PM
 */
-public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<ID>>
-        extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE> {
+public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<PID>, PID extends Serializable>
+        extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE, PID> {
 
     public ApiResourceNestedPropertyController(ApiResourceDetails<E, ID, B> resource) {
         super(resource);
@@ -82,14 +82,14 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
     // ************************************************************************************************
 
     @RequestMapping(value="", method= RequestMethod.GET)
-    public ResponseEntity<Resource<E>> getOne(@PathVariable ID peId){
+    public ResponseEntity<Resource<E>> getOne(@PathVariable PID peId){
         PE pe = parentEntityService.getOne(peId);
         E entity = loadFromEntity(pe);
         return getResponseEntity(entity, pe);
     }
 
     @RequestMapping(value="", method= RequestMethod.PUT)
-    public ResponseEntity<Resource<E>> putOne(@PathVariable ID peId, @RequestBody B payload){
+    public ResponseEntity<Resource<E>> putOne(@PathVariable PID peId, @RequestBody B payload){
         PE parent = parentEntityService.getOne(peId);
         E entity = loadFromEntity(parent);
         Assert.notNull(entity);
@@ -99,7 +99,7 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
     }
 
     @RequestMapping(value="", method= RequestMethod.POST)
-    public ResponseEntity<Resource<E>> postOne(@PathVariable ID peId, @RequestBody B bean){
+    public ResponseEntity<Resource<E>> postOne(@PathVariable PID peId, @RequestBody B bean){
         PE parent = parentEntityService.getOne(peId);
 
         E entity = createInstance();

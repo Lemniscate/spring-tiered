@@ -36,8 +36,8 @@ import java.util.List;
 * @param <B> the "bean" type that matches data submission for this entity.
 * @param <PE> the "parentClass" entity.
 */
-public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<ID>>
-        extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE>  {
+public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<PID>, PID extends Serializable>
+        extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE, PID>  {
 
     public ApiResourceNestedCollectionController(ApiResourceDetails<E, ID, B> resource) {
         super(resource);
@@ -108,14 +108,14 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
     }
 
     @RequestMapping(value="", method= RequestMethod.GET)
-    public ResponseEntity<Page<Resource<E>>> getAll(@PathVariable ID peId, Pageable p){
+    public ResponseEntity<Page<Resource<E>>> getAll(@PathVariable PID peId, Pageable p){
         PE pe = parentEntityService.getOne(peId);
         Page<E> entities = loadFromEntity(pe, p);
         return getResponseEntity(entities, pe, p);
     }
 
     @RequestMapping(value="/{neId}", method= RequestMethod.GET)
-    public ResponseEntity<Resource<E>> getOne(@PathVariable ID peId, @PathVariable ID neId){
+    public ResponseEntity<Resource<E>> getOne(@PathVariable PID peId, @PathVariable ID neId){
     	PE parent = parentEntityService.getOne(peId);
         E entity = nestedEntityService.getOne(neId);
 
@@ -126,7 +126,7 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
     }
 
     @RequestMapping(value="", method= RequestMethod.POST)
-    public ResponseEntity<Resource<E>> postOne(@PathVariable ID peId, @RequestBody B bean){
+    public ResponseEntity<Resource<E>> postOne(@PathVariable PID peId, @RequestBody B bean){
         PE parent = parentEntityService.getOne(peId);
 
         E entity = createInstance();
@@ -140,7 +140,7 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
     }
 
     @RequestMapping(value="/{neId}", method= RequestMethod.PUT)
-    public ResponseEntity<Resource<E>> putOne(@PathVariable ID peId, @PathVariable ID neId, @RequestBody B payload){
+    public ResponseEntity<Resource<E>> putOne(@PathVariable PID peId, @PathVariable ID neId, @RequestBody B payload){
     	PE parent = parentEntityService.getOne(peId);
         E clone = createInstance();
         copyProperties(clone, payload);

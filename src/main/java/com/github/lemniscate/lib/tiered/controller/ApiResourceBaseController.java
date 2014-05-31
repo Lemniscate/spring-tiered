@@ -53,7 +53,7 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
     }
 
 
-    public static abstract class ApiResourceBaseNestedController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<ID>>
+    public static abstract class ApiResourceBaseNestedController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<PID>, PID extends Serializable>
             extends ApiResourceBaseController<E, ID, B>{
 
         private final Class<?> parentClass;
@@ -64,15 +64,13 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
         }
 
         @Inject
-        protected ApiNestedResourceAssembler<E, ID, B, PE> assembler;
-        @Inject
-        protected ApiResourceRepository<PE, ID> parentRepository;
+        protected ApiNestedResourceAssembler<E, ID, B, PE, PID> assembler;
         @Inject
         protected ApiResourceRepository<E, ID> repository;
         @Inject
         protected ApiResourceService<E, ID> nestedEntityService;
         @Inject
-        protected ApiResourceService<PE, ID> parentEntityService;
+        protected ApiResourceService<PE, PID> parentEntityService;
 
     }
 }

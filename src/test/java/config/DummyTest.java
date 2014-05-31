@@ -58,10 +58,10 @@ public class DummyTest {
     private ApiResourceController<User, Long, User> userController;
 
     @Inject
-    private ApiResourceNestedCollectionController<Pet, Long, Pet, User> petController;
+    private ApiResourceNestedCollectionController<Pet, Long, Pet, User, Long> petController;
 
     @Inject
-    private ApiResourceNestedPropertyController<UserDetails, Long, UserDetails, User> detailsController;
+    private ApiResourceNestedPropertyController<UserDetails, Long, UserDetails, User, Long> detailsController;
 
     @Test
     public void foo(){

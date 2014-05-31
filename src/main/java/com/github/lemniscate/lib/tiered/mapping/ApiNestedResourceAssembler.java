@@ -19,7 +19,8 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class ApiNestedResourceAssembler<E extends Identifiable<ID>, ID extends Serializable, B, P extends Identifiable<ID>> extends ResourceAssemblerSupport<E, Resource<E>> {
+public class ApiNestedResourceAssembler<E extends Identifiable<ID>, ID extends Serializable, B, P extends Identifiable<PID>, PID extends Serializable>
+        extends ResourceAssemblerSupport<E, Resource<E>> {
 
     @Inject
     protected EntityLinks entityLinks;
