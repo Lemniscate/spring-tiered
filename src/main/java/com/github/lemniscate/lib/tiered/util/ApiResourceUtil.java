@@ -2,7 +2,6 @@ package com.github.lemniscate.lib.tiered.util;
 
 import com.github.lemniscate.lib.tiered.annotation.ApiNestedResource;
 import com.github.lemniscate.lib.tiered.annotation.ApiResource;
-import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
 import org.reflections.Reflections;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;

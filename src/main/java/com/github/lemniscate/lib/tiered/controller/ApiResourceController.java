@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +42,6 @@ public class ApiResourceController<E extends Identifiable<ID>, ID extends Serial
     @Inject
     private ApiResourceService<E, ID> service;
 
-    @Inject
-    private ConversionService conversionService;
     @Inject
     private ApplicationContext ctx;
 

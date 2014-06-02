@@ -9,8 +9,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.ReflectionUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

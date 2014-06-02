@@ -4,26 +4,20 @@ import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -78,22 +72,18 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
         ReflectionUtils.setField(field, parent, value);
     }
 
-
-    /**
-     * Defines how to load nested entities from a given entity.
-     *
-     * @param parent the parentClass entity
-     * @param pageable the requested page of data
-     * @return
-     */
-    protected Page<E> loadFromEntity(final PE parent, Pageable pageable){
-        Specification<E> spec = new Specification<E>() {
-            @Override
-            public Predicate toPredicate(Root<E> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-                return cb.equal( root.get( resource.getParentProperty() ).get("id"), parent.getId() );
+    protected Page<E> loadFromEntity(final PE parent, MultiValueMap<String, String> params, Pageable pageable){
+        Iterator<String> itr = params.keySet().iterator();
+        while( itr.hasNext()){
+            String key = itr.next();
+            if (key.startsWith("_")){
+                itr.remove();
             }
-        };
-        return repository.findAll(spec, pageable);
+        }
+
+        params.add(resource.getParentProperty() + ".id", conversionService.convert(parent.getId(), String.class));
+
+        return nestedEntityService.query(params, pageable);
     };
 
     protected ResponseEntity<Page<Resource<E>>> getResponseEntity(Page<E> entities, PE parent, Pageable p){
@@ -108,9 +98,9 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
     }
 
     @RequestMapping(value="", method= RequestMethod.GET)
-    public ResponseEntity<Page<Resource<E>>> getAll(@PathVariable PID peId, Pageable p){
+    public ResponseEntity<Page<Resource<E>>> getAll(@PathVariable PID peId, @RequestParam MultiValueMap<String, String> params, Pageable p){
         PE pe = parentEntityService.getOne(peId);
-        Page<E> entities = loadFromEntity(pe, p);
+        Page<E> entities = loadFromEntity(pe, params, p);
         return getResponseEntity(entities, pe, p);
     }
 

@@ -36,7 +36,7 @@ final class AssemblerFieldHelper<E extends Identifiable<ID>, ID extends Serializ
             ReflectionUtils.makeAccessible(field);
             Collection<?> value = (Collection<?>) field.get(entity);
             if( value != null && !value.isEmpty() ){
-                Class<?>[] types = new Class<?>[]{details.getDomainClass(), details.getIdClass(), details.getBeanClass(), details.getParentClass()};
+                Class<?>[] types = new Class<?>[]{details.getDomainClass(), details.getIdClass(), details.getBeanClass(), details.getParentClass(), details.getParentIdClass()};
                 ApiResourceNestedCollectionController controller = beanLookup.lookupByTypeAndParameters(ApiResourceNestedCollectionController.class, types);
                 links.add(arLinkBuilder.linkTo(controller.getClass(), details.getDomainClass(), entity.getId()).withRel( field.getName() ));
             }

@@ -7,6 +7,7 @@ import com.github.lemniscate.lib.tiered.svc.ApiResourceService;
 import com.github.lemniscate.lib.tiered.util.EntityAwareBeanUtil;
 import lombok.Getter;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.util.Assert;
 
@@ -22,6 +23,9 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
 
     @Inject
     protected EntityAwareBeanUtil beanUtil;
+
+    @Inject
+    protected ConversionService conversionService;
 
     protected final Class<E> domainClass;
     protected final Class<ID> idClass;

@@ -3,7 +3,6 @@ package com.github.lemniscate.lib.tiered.annotation;
 import lombok.Getter;
 import org.hibernate.annotations.ManyToAny;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -87,6 +86,12 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
         }
         return from(domainClass);
     };
+
+    public Class<?> getParentIdClass(){
+        Assert.notNull(parentClass, "No parent class found");
+        Class<?> pid = ApiResourceDetails.from( parentClass ).getIdClass();
+        return pid;
+    }
 
     public boolean isNested(){
         return parentClass != null;
