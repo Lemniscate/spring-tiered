@@ -82,8 +82,8 @@ public class ApiResourceEntityLinks extends AbstractEntityLinks{
 
     @Override
     public boolean supports(Class<?> entity) {
-        return AnnotationUtils.isAnnotationDeclaredLocally(ApiResource.class, entity)
-                || AnnotationUtils.isAnnotationDeclaredLocally(ApiNestedResource.class, entity);
+        return AnnotationUtils.findAnnotation(entity, ApiResource.class) != null
+                || AnnotationUtils.findAnnotation(entity, ApiNestedResource.class) != null;
     }
 
 }

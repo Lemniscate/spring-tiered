@@ -45,7 +45,7 @@ public class ApiResourceAssembler<E extends Identifiable<ID>, ID extends Seriali
      * so implementations can customize links.
      */
     private void doAddLinks(Collection<Link> links, E entity) {
-        ApiResourceDetails details = ApiResourceDetails.wrap(entity.getClass());
+        ApiResourceDetails details = ApiResourceDetails.from(entity.getClass());
         Link link;
         if( details.isNested() && !details.isNestedCollection()){
             link = entityLinks.linkToSingleResource(entity).withSelfRel();

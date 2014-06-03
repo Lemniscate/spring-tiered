@@ -27,18 +27,6 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
     private final Class<?> beanClass;
     private final String name, path, parentProperty;
 
-    public static <E extends Identifiable<ID>, ID extends Serializable, B> ApiResourceDetails<E, ID, B> wrap(Class<?> domainClass){
-        ApiResource ar = domainClass.getAnnotation(ApiResource.class);
-        ApiNestedResource anr = domainClass.getAnnotation(ApiNestedResource.class);
-        if( ar != null ){
-            return new ApiResourceDetails(ar, domainClass);
-        }else if( anr != null){
-            return new ApiResourceDetails(anr, domainClass);
-        }
-
-        throw new IllegalArgumentException("Could not find annotations");
-    }
-
     public ApiResourceDetails(ApiResource resource, Class<?> domainClass){
         this.name = getPath(domainClass);
         this.path = "/" + name;
@@ -75,6 +63,11 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
             wrapper = new ApiResourceDetails(ar, domainClass);
         }else if( anr != null ){
             wrapper = new ApiResourceDetails(anr, domainClass);
+        }else{
+            // look for an ancestor who might be a resource
+            if( !Object.class.equals( domainClass.getSuperclass() )){
+                wrapper = from( domainClass.getSuperclass() );
+            }
         }
         return wrapper;
     }

@@ -2,6 +2,8 @@ package com.github.lemniscate.lib.tiered.mapping;
 
 import com.github.lemniscate.lib.tiered.annotation.ApiResourceAssemblerIgnore;
 import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
+import com.github.lemniscate.lib.tiered.controller.ApiResourceBaseController;
+import com.github.lemniscate.lib.tiered.controller.ApiResourceController;
 import com.github.lemniscate.lib.tiered.controller.ApiResourceNestedCollectionController;
 import com.github.lemniscate.lib.tiered.util.BeanLookupUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +38,16 @@ final class AssemblerFieldHelper<E extends Identifiable<ID>, ID extends Serializ
             ReflectionUtils.makeAccessible(field);
             Collection<?> value = (Collection<?>) field.get(entity);
             if( value != null && !value.isEmpty() ){
-                Class<?>[] types = new Class<?>[]{details.getDomainClass(), details.getIdClass(), details.getBeanClass(), details.getParentClass(), details.getParentIdClass()};
-                ApiResourceNestedCollectionController controller = beanLookup.lookupByTypeAndParameters(ApiResourceNestedCollectionController.class, types);
+
+                Class<?>[] types;
+                ApiResourceBaseController controller;
+                if( details.isNested() ){
+                    types = new Class<?>[]{details.getDomainClass(), details.getIdClass(), details.getBeanClass(), details.getParentClass(), details.getParentIdClass()};
+                    controller = beanLookup.lookupByTypeAndParameters(ApiResourceNestedCollectionController.class, types);
+                }else{
+                    types = new Class<?>[]{details.getDomainClass(), details.getIdClass(), details.getBeanClass()};
+                    controller = beanLookup.lookupByTypeAndParameters(ApiResourceController.class, types);
+                }
                 links.add(arLinkBuilder.linkTo(controller.getClass(), details.getDomainClass(), entity.getId()).withRel( field.getName() ));
             }
         }else{

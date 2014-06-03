@@ -198,7 +198,10 @@ public class ApiResourcesPostProcessor implements
                     Class<?> repoInterface = Class.forName(repoName);
                     if( ApiResourceRepository.class.isAssignableFrom(repoInterface) ){
                         Class<?> entity = GenericTypeResolver.resolveTypeArguments(repoInterface , ApiResourceRepository.class)[0];
-                        map.get(entity).repository = def;
+                        BeanDefinitionDetails details = map.get(entity);
+                        if( details != null ){
+                            details.repository = def;
+                        }
                     }
                 }
             }
