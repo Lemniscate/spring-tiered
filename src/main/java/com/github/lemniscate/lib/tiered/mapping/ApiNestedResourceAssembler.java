@@ -59,7 +59,10 @@ public class ApiNestedResourceAssembler<E extends Identifiable<ID>, ID extends S
 
 	private void doAddLinks(Collection<Link> links, E entity, final P parent){
         ApiResourceDetails details = ApiResourceDetails.from(entity.getClass());
-        String parentHref = entityLinks.linkFor(parent.getClass(), parent.getId()).slash(entity).toString();
+        String parentHref = entityLinks.linkFor(parent.getClass())
+                .slash(parent)
+                .slash(entity)
+                .toString();
         String[] pathSplit = details.getPath().split("/");
         String base = parentHref + "/" + pathSplit[pathSplit.length - 1];
         Link result = new Link( base + "/" + entity.getId(), "self");

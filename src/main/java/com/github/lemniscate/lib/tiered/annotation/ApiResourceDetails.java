@@ -65,7 +65,8 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
             wrapper = new ApiResourceDetails(anr, domainClass);
         }else{
             // look for an ancestor who might be a resource
-            if( !Object.class.equals( domainClass.getSuperclass() )){
+            Class<?> superClass = domainClass.getSuperclass();
+            if( superClass != null && !Object.class.equals( superClass )){
                 wrapper = from( domainClass.getSuperclass() );
             }
         }
