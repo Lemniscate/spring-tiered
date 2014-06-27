@@ -8,6 +8,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -92,9 +93,17 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
         return new ResponseEntity<Page<Resource<E>>>(pagedResources, HttpStatus.OK);
     }
 
-    protected ResponseEntity<Resource<E>> getResponseEntity(E entity, PE parent){
-    	Resource<E> resource = assembler.toResource(entity, parent);
-    	return new ResponseEntity<Resource<E>>(resource, HttpStatus.OK);
+    protected ResponseEntity<Resource<E>> getResponseEntity(E entity, PE parent, boolean created){
+        HttpStatus status = HttpStatus.OK;
+        Resource<E> resource = assembler.toResource(entity, parent);
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+        if( created ){
+            headers.add(X_SELF_HREF, resource.getLink("self").getHref() );
+            status = HttpStatus.CREATED;
+        }
+
+        ResponseEntity<Resource<E>> response = new ResponseEntity<Resource<E>>(resource, headers, status);
+        return response;
     }
 
     @RequestMapping(value="", method= RequestMethod.GET)
@@ -112,7 +121,7 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
         // TODO enforce that the parentClass matches the nested's parentClass...
         // PE parentClass = parentEntityService.getOne(peId);
 
-        return getResponseEntity(entity, parent);
+        return getResponseEntity(entity, parent, false);
     }
 
     @RequestMapping(value="", method= RequestMethod.POST)
@@ -126,7 +135,7 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
         nestedEntityService.save(entity);
         parentEntityService.save(parent);
 
-        return getResponseEntity(entity, parent);
+        return getResponseEntity(entity, parent, true);
     }
 
     @RequestMapping(value="/{neId}", method= RequestMethod.PUT)
@@ -137,7 +146,7 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
 
         E entity = nestedEntityService.update(neId, clone);
 
-        return getResponseEntity(entity, parent);
+        return getResponseEntity(entity, parent, false);
     }
 
 }

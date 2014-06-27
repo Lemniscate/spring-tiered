@@ -7,6 +7,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,12 +72,20 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
         return repository.findOne(spec);
     };
 
-    protected ResponseEntity<Resource<E>> getResponseEntity(E entity, PE parent){
+    protected ResponseEntity<Resource<E>> getResponseEntity(E entity, PE parent, boolean created){
         if( entity == null ){
             return new ResponseEntity<Resource<E>>(HttpStatus.NOT_FOUND);
         }else{
+            HttpStatus status = HttpStatus.OK;
             Resource<E> resource = assembler.toResource(entity, parent);
-            return new ResponseEntity<Resource<E>>(resource, HttpStatus.OK);
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+            if( created ){
+                headers.add(X_SELF_HREF, resource.getLink("self").getHref() );
+                status = HttpStatus.CREATED;
+            }
+
+            ResponseEntity<Resource<E>> response = new ResponseEntity<Resource<E>>(resource, headers, status);
+            return response;
         }
     }
 
@@ -85,7 +95,7 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
     public ResponseEntity<Resource<E>> getOne(@PathVariable PID peId){
         PE pe = parentEntityService.getOne(peId);
         E entity = loadFromEntity(pe);
-        return getResponseEntity(entity, pe);
+        return getResponseEntity(entity, pe, false);
     }
 
     @RequestMapping(value="", method= RequestMethod.PUT)
@@ -95,7 +105,7 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
         Assert.notNull(entity);
         copyProperties(entity, payload);
         nestedEntityService.save(entity);
-        return getResponseEntity(entity, parent);
+        return getResponseEntity(entity, parent, false);
     }
 
     @RequestMapping(value="", method= RequestMethod.POST)
@@ -109,7 +119,7 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
         nestedEntityService.save(entity);
         parentEntityService.save(parent);
 
-        return getResponseEntity(entity, parent);
+        return getResponseEntity(entity, parent, true);
     }
 
 }

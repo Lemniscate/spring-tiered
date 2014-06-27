@@ -17,6 +17,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -91,7 +92,9 @@ public class ApiResourceController<E extends Identifiable<ID>, ID extends Serial
 
         entity = service.save(entity);
         Resource<E> resource = assembler.toResource(entity);
-        ResponseEntity<Resource<E>> response = new ResponseEntity<Resource<E>>(resource, HttpStatus.OK);
+        MultiValueMap<String,String> headers = new LinkedMultiValueMap<String, String>();
+        headers.add(X_SELF_HREF, resource.getLink("self").getHref() );
+        ResponseEntity<Resource<E>> response = new ResponseEntity<Resource<E>>(resource, headers, HttpStatus.CREATED);
         return response;
     }
 

@@ -18,6 +18,8 @@ import java.io.Serializable;
 public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID extends Serializable, B>
         implements InitializingBean {
 
+    public static final String X_SELF_HREF = "X-SELF-HREF";
+
     @Getter
     protected final ApiResourceDetails<E, ID, B> resource;
 
