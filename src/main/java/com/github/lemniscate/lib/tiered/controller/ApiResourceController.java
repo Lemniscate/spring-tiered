@@ -27,6 +27,7 @@ import javax.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Getter @Setter
@@ -95,6 +96,15 @@ public class ApiResourceController<E extends Identifiable<ID>, ID extends Serial
         MultiValueMap<String,String> headers = new LinkedMultiValueMap<String, String>();
         headers.add(X_SELF_HREF, resource.getLink("self").getHref() );
         ResponseEntity<Resource<E>> response = new ResponseEntity<Resource<E>>(resource, headers, HttpStatus.CREATED);
+        return response;
+    }
+
+    @RequestMapping(value="/searches", method=RequestMethod.POST)
+    public ResponseEntity<Page<Resource<E>>> search(@RequestBody Map<String, Object> search, Pageable pageable){
+        Page<E> entities = service.search(search, pageable);
+        List<Resource<E>> resources = assembler.toResources(entities.getContent());
+        Page<Resource<E>> pagedResources = new PageImpl<Resource<E>>(resources, pageable, entities.getTotalElements());
+        ResponseEntity<Page<Resource<E>>> response = new ResponseEntity<Page<Resource<E>>>(pagedResources, HttpStatus.OK);
         return response;
     }
 

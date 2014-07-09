@@ -1,6 +1,9 @@
 package com.github.lemniscate.lib.tiered.controller;
 
 import com.github.lemniscate.lib.tiered.annotation.ApiResourceDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
@@ -22,6 +25,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @Author dave 5/9/14 9:20 PM
@@ -120,6 +125,15 @@ public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID 
         parentEntityService.save(parent);
 
         return getResponseEntity(entity, parent, true);
+    }
+
+    @RequestMapping(value="/searches", method=RequestMethod.POST)
+    public ResponseEntity<Page<Resource<E>>> search(@RequestBody Map<String, Object> search, Pageable pageable){
+        Page<E> entities = nestedEntityService.search(search, pageable);
+        List<Resource<E>> resources = assembler.toResources(entities.getContent());
+        Page<Resource<E>> pagedResources = new PageImpl<Resource<E>>(resources, pageable, entities.getTotalElements());
+        ResponseEntity<Page<Resource<E>>> response = new ResponseEntity<Page<Resource<E>>>(pagedResources, HttpStatus.OK);
+        return response;
     }
 
 }

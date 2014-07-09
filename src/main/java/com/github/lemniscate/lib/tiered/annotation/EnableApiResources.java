@@ -51,6 +51,7 @@ public @interface EnableApiResources {
 
             AbstractBeanDefinition handlerMappingDef = BeanDefinitionBuilder.rootBeanDefinition(ApiResourceControllerHandlerMapping.class)
                     .addConstructorArgValue(apiPrefix)
+                    .addPropertyValue("order", -1)
                     .getBeanDefinition();
             registry.registerBeanDefinition("apiResourcesHandlerMapping", handlerMappingDef);
 

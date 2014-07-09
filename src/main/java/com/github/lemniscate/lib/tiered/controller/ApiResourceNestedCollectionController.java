@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
 * Used to represent nested entities, such as "/person/1/address/5". It is
@@ -147,6 +148,15 @@ public class ApiResourceNestedCollectionController<E extends Identifiable<ID>, I
         E entity = nestedEntityService.update(neId, clone);
 
         return getResponseEntity(entity, parent, false);
+    }
+
+    @RequestMapping(value="/searches", method=RequestMethod.POST)
+    public ResponseEntity<Page<Resource<E>>> search(@RequestBody Map<String, Object> search, Pageable pageable){
+        Page<E> entities = nestedEntityService.search(search, pageable);
+        List<Resource<E>> resources = assembler.toResources(entities.getContent());
+        Page<Resource<E>> pagedResources = new PageImpl<Resource<E>>(resources, pageable, entities.getTotalElements());
+        ResponseEntity<Page<Resource<E>>> response = new ResponseEntity<Page<Resource<E>>>(pagedResources, HttpStatus.OK);
+        return response;
     }
 
 }

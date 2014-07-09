@@ -3,6 +3,7 @@ package com.github.lemniscate.lib.tiered.svc;
 import com.github.lemniscate.lib.tiered.repo.ApiResourceRepository;
 import com.github.lemniscate.lib.tiered.repo.specification.GenericMapPathSpecification;
 import com.github.lemniscate.lib.tiered.util.EntityAwareBeanUtil;
+import com.github.lemniscate.spring.search.OperationParser;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * The service tier, where business logic should exist.
@@ -85,4 +87,10 @@ public class ApiResourceService<E extends Identifiable<ID>, ID extends Serializa
         return repo.save(existing);
     }
 
+    public Page<E> search(Map<String, Object> search, Pageable pageable) {
+        OperationParser parser = new OperationParser(conversionService);
+        Specification spec = parser.parse(search);
+        Page<E> result = repo.findAll(spec, pageable);
+        return result;
+    }
 }
