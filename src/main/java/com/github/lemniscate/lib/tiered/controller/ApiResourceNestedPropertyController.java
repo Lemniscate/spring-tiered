@@ -34,10 +34,6 @@ import java.util.Map;
 public class ApiResourceNestedPropertyController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<PID>, PID extends Serializable>
         extends ApiResourceBaseController.ApiResourceBaseNestedController<E, ID, B, PE, PID> {
 
-    public ApiResourceNestedPropertyController(ApiResourceDetails<E, ID, B> resource) {
-        super(resource);
-    }
-
     /**
      * Used to associate a child entity to it's parentClass.
      * @param entity

@@ -33,7 +33,9 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
 
         this.idClass = (Class<ID>) resource.idClass();
         this.domainClass = (Class<E>) domainClass;
-        this.beanClass = domainClass; // TODO implement me
+        this.beanClass = resource.beanClass().equals( Object.class )
+            ? domainClass
+            : resource.beanClass();
         this.parentClass = null;
         this.parentProperty = null;
     }
@@ -49,7 +51,10 @@ public final class ApiResourceDetails<E extends Identifiable<ID>, ID extends Ser
 
         this.idClass = (Class<ID>) resource.idClass();
         this.domainClass = (Class<E>) domainClass;
-        this.beanClass = domainClass; // TODO implement me
+        this.beanClass = resource.beanClass().equals( Object.class )
+                ? domainClass
+                : resource.beanClass();
+
         this.parentProperty = resource.parentProperty();
     }
 

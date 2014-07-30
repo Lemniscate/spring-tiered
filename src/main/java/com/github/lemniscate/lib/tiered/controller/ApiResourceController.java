@@ -16,6 +16,8 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -31,6 +33,7 @@ import java.util.Map;
 
 @Slf4j
 @Getter @Setter
+@Transactional(propagation = Propagation.REQUIRED)
 public class ApiResourceController<E extends Identifiable<ID>, ID extends Serializable, B>
         extends ApiResourceBaseController<E, ID, B>
         implements InitializingBean {
@@ -49,10 +52,6 @@ public class ApiResourceController<E extends Identifiable<ID>, ID extends Serial
 
     @PersistenceContext
     private EntityManager em;
-
-    public ApiResourceController(ApiResourceDetails<E, ID, B> resource) {
-        super(resource);
-    }
 
     @RequestMapping(value="", method=RequestMethod.GET)
     public ResponseEntity<Page<Resource<E>>> getAll(@RequestParam MultiValueMap<String, String> params, Pageable p){

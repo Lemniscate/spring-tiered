@@ -8,6 +8,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface ApiNestedResource {
 
+    Class<?> beanClass() default Object.class;
     Class<? extends Serializable> idClass() default Long.class;
     String parentProperty();
     String path() default "";

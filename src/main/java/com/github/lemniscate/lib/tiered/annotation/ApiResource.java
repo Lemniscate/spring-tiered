@@ -8,6 +8,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface ApiResource {
 
+    Class<?> beanClass() default Object.class;
     Class<? extends Serializable> idClass() default Long.class;
     String path() default "";
 }

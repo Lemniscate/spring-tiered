@@ -7,14 +7,18 @@ import com.github.lemniscate.lib.tiered.svc.ApiResourceService;
 import com.github.lemniscate.lib.tiered.util.EntityAwareBeanUtil;
 import lombok.Getter;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.hateoas.Identifiable;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
 
-
+@Transactional(propagation = Propagation.REQUIRED)
 public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID extends Serializable, B>
         implements InitializingBean {
 
@@ -33,8 +37,9 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
     protected final Class<ID> idClass;
     protected final Class<B> beanClass;
 
-    protected ApiResourceBaseController(ApiResourceDetails<E, ID, B> resource) {
-        Assert.notNull(resource, "Resource information required");
+    protected ApiResourceBaseController() {
+        Class<E> persistentClass = (Class<E>) GenericTypeResolver.resolveTypeArguments(getClass(), ApiResourceBaseController.class)[0];
+        ApiResourceDetails<E, ID, B> resource = ApiResourceDetails.from(persistentClass);
         this.resource = resource;
         this.domainClass = resource.getDomainClass();
         this.idClass = resource.getIdClass();
@@ -58,14 +63,14 @@ public abstract class ApiResourceBaseController<E extends Identifiable<ID>, ID e
         Assert.notNull(resource, "Resource must be supplied");
     }
 
-
+    @Transactional(propagation = Propagation.REQUIRED)
     public static abstract class ApiResourceBaseNestedController<E extends Identifiable<ID>, ID extends Serializable, B, PE extends Identifiable<PID>, PID extends Serializable>
             extends ApiResourceBaseController<E, ID, B>{
 
         private final Class<?> parentClass;
 
-        protected ApiResourceBaseNestedController(ApiResourceDetails<E, ID, B> resource) {
-            super(resource);
+        protected ApiResourceBaseNestedController() {
+            super();
             this.parentClass = resource.getParentClass();
         }
 

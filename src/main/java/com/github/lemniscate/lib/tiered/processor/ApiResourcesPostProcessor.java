@@ -119,13 +119,13 @@ public class ApiResourcesPostProcessor implements
                         : ApiResourceNestedPropertyController.class;
 
                 Class<?> pid = ApiResourceDetails.from( wrapper.getParentClass() ).getIdClass();
-                serviceClass = JavassistUtil.generateTypedSubclass(name, baseClass, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getDomainClass(), wrapper.getParentClass(), pid);
+                serviceClass = JavassistUtil.generateTypedSubclass(name, baseClass, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getBeanClass(), wrapper.getParentClass(), pid);
             }else{
-                serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceController.class, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getDomainClass());
+                serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceController.class, wrapper.getDomainClass(), wrapper.getIdClass(), wrapper.getBeanClass());
             }
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
-                    .addConstructorArgValue(wrapper)
+//                    .addConstructorArgValue(wrapper)
                     .getBeanDefinition();
             registry.registerBeanDefinition( name, def);
             details.controller = def;
